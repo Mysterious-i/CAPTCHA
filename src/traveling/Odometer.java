@@ -47,12 +47,13 @@ public class Odometer implements TimerListener {
       * the odometer timer is called
       * @param start the <code>boolean</code> value which determines whether the odometer
       * will star the timer
-      * @param colorSensor the <code>ColorSensor</code> that will be used for odometry correction
+      * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
+      * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
       */
-    public Odometer(int period, boolean start, ColorSensor colorSensor) {
+    public Odometer(int period, boolean start, LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
         
         this.navigation = new Navigation(this);
-        odometryCorrection = new OdometryCorrection(this, colorSensor);
+       // odometryCorrection = new OdometryCorrection(this, odometerCorrectionLeft, odometerCorrectionRight);
 
         odometerTimer = new Timer(period, this);
         leftMotor = Motor.A;
@@ -63,16 +64,16 @@ public class Odometer implements TimerListener {
         oldDH = new double [2];
         dDH = new double [2];
         lock = new Object();
-        this.rightRadius = 2.1;
-        this.leftRadius = 2.1;
-        this.width = 15.45;
+        this.rightRadius = -2.1;
+        this.leftRadius = -2.1;
+        this.width = 17.25;
           
         //If the use wants, start the timer
         if (start){
             odometerTimer.start();
         }
         
-        odometryCorrection.start();
+        //odometryCorrection.start();
     }
     
 
@@ -83,10 +84,11 @@ public class Odometer implements TimerListener {
      * <code>OdometryCorrection</code>. Finally it sets the inital position of the robot to the 
      * origin with angle 0 and 
      * 
-     * @param colorSensor the <code>ColorSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
      */
-    public Odometer(ColorSensor colorSensor) {
-        this(DEFAULT_PERIOD, false, colorSensor);
+    public Odometer(LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+        this(DEFAULT_PERIOD, false, odometerCorrectionLeft, odometerCorrectionRight);
     }
       
     /**
@@ -98,10 +100,11 @@ public class Odometer implements TimerListener {
      * 
      * @param start the <code>boolean<code> value that determines whther the odometer timer will start
      * in the constructor
-     * @param colorSensor the <code>ColorSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
      */
-    public Odometer(boolean start, ColorSensor colorSensor) {
-        this(DEFAULT_PERIOD, start, colorSensor);
+    public Odometer(boolean start, LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+        this(DEFAULT_PERIOD, start, odometerCorrectionLeft, odometerCorrectionRight);
     }
       
     /**
@@ -113,10 +116,11 @@ public class Odometer implements TimerListener {
      * 
      * @param period the <code>int</code> period that will determine the rate at which
      * the odometer timer is called
-     * @param colorSensor the <code>ColorSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
      */
-    public Odometer(int period, ColorSensor colorSensor) {
-        this(period, false, colorSensor);
+    public Odometer(int period, LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+        this(period, false, odometerCorrectionLeft, odometerCorrectionRight);
     }
   
       

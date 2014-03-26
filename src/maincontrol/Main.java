@@ -1,10 +1,17 @@
 package maincontrol;
+import java.io.IOException;
+
 import capture.FlagCapturer;
 import traveling.Odometer;
 import lejos.nxt.*;
+import lejos.nxt.comm.RS485;
+import lejos.nxt.remote.RemoteMotor;
+import lejos.nxt.remote.RemoteNXT;
+import lejos.util.Delay;
 import lejos.util.Timer;
 import localize.USLocalizer;
 import localize.USLocalizer.LocalizationType;
+import maincontrol.NXTLCPRespond.Responder;
 
 /**
  * The <code>Main</code> class structures the different stages that need to be preformed
@@ -25,9 +32,9 @@ import localize.USLocalizer.LocalizationType;
  */
 public class Main {
 
-    private static int[] FinalPosCoords;
+    private static int[] FinalPosCoords = {0};
 
-    private static int[] FlagPosCoords;
+    private static int[] FlagPosCoords = {0};
     
     private static Odometer odometer;
     private static USLocalizer usl;
@@ -45,13 +52,30 @@ public class Main {
 	public static void main(String[] args) {
 		
 		int buttonChoice;
-		UltrasonicSensor us = new UltrasonicSensor(SensorPort.S2);
-		ColorSensor colorSensor = new ColorSensor(SensorPort.S1);
+		//Create the slave NXT
+		RemoteNXT slaveNXT = null;
+		try {
+			slaveNXT = new RemoteNXT("NXT", RS485.getConnector());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//Initialize the slave's ports
+		//TODO the Color sensor is undefined for slave so make sure ports are good
+		ColorSensor detectionSensor = new ColorSensor(SensorPort.S4);
+		UltrasonicSensor usRight = new UltrasonicSensor(slaveNXT.S2);
+		UltrasonicSensor usLeft = new UltrasonicSensor(slaveNXT.S3);
+		RemoteMotor grabberRight = slaveNXT.A;
+		RemoteMotor grabberLeft = slaveNXT.B;
+		
+		//Initilize the master's ports
+		LightSensor odometerCorrectionRight = new LightSensor(SensorPort.S1);
+		LightSensor odometerCorrectionLeft = new LightSensor(SensorPort.S2);
 		
 		// setup the odometer, display, and ultrasonic and light sensors
 
-		odometer = new Odometer(true, colorSensor);
-		FlagCapturer flagCapturer = new FlagCapturer(colorSensor, us, odometer);
+		odometer = new Odometer(true, odometerCorrectionRight, odometerCorrectionLeft);
+		FlagCapturer flagCapturer = new FlagCapturer(detectionSensor, usRight, usLeft, odometer);
 		
 		do {
 			// clear the display
@@ -72,21 +96,24 @@ public class Main {
 
 			LCD.clear();
 			
-			usl = new USLocalizer (odometer, us, USLocalizer.LocalizationType.RISING_EDGE);
-			usl.doLocalization();
+
+			//usl = new USLocalizer (odometer, usRight, USLocalizer.LocalizationType.RISING_EDGE);
+			//usl.doLocalization();
 			
 			//Switch the mode of the ultrasonic sensor to coninuous because it was in ping mode for the localization
-			us.continuous();
+			usRight.continuous();
 			
 			odometer.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
 			odometer.setAng(0);
 			
+			//NavigationTest navTest = new NavigationTest(odometer);
+			//navTest.goInASquare();
 			flagCapturer.captureFlag(FlagPosCoords, FinalPosCoords);
 			
 		}while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		
-		System.exit(0);
-		
+		System.exit(0);		
 	}
 
 }
+

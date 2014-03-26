@@ -16,18 +16,18 @@ import lejos.util.TimerListener;
  *
  */
 public class LCDInfo implements TimerListener{
-    	private static final int LCD_REFRESH = 350;
+    private static final int LCD_REFRESH = 350;
 	private Timer lcdTimer;
-	
+	private Odometer odometer;
 	/**
 	 * The constructor of the <code>LCDInfo</code> class will initiate the <code>Odometer</code>,
 	 * and <code>Timer</code>. It then starts the <code>Timer</code>
 	 * @param odo
 	 */
-	public LCDInfo(Odometer odo) {
+	public LCDInfo(Odometer odometer) {
 		this.lcdTimer = new Timer(LCD_REFRESH, this);
 		LCD.clear();
-		
+		this.odometer = odometer;
 		// start the timer
 		lcdTimer.start();
 	}
@@ -37,6 +37,8 @@ public class LCDInfo implements TimerListener{
 	 * {@inheritDoc}
 	 */
 	public void timedOut() { 
-		
+		LCD.drawString("odo x   " + odometer.getX(), 0, 0);
+		LCD.drawString("odo y   " + odometer.getY(), 0, 1);
+
 	}
 }

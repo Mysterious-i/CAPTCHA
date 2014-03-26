@@ -26,12 +26,11 @@ public class FlagCapturer {
 	private Navigation navigation;
 	private Detection detection;
 	private Odometer odometer;
-	private static int ver = 0;
-	private static int hor = 0;
+	private static double ver = 0;
+	private static double hor = 0;
 	private static final int UNTIL_END = 10000;
-	private final int MAX_DISTANCE = 26;
-	private int[][] checkpoints = new int[30][20];
-
+	private final int MAX_DISTANCE = 25;
+	private boolean[][] isValidMapPoint = new boolean[7][7];
 	/**
 	 * The constructer for the <code>FlagCapturer</code> class initializes the odometer and navigation
 	 * as well as creates an object of type <code>Detection</code>. 
@@ -40,11 +39,12 @@ public class FlagCapturer {
 	 * @param us The <code>UltrasonicSensor</code> that is used by the <code>Detection</code> class
 	 * @param odometer The <code>Odometer</code> that is used by the <code>Detection</code> class
 	 */
-	public FlagCapturer(ColorSensor colorSensor, UltrasonicSensor us, Odometer odometer) {
+	public FlagCapturer(ColorSensor colorSensor, UltrasonicSensor usRight, UltrasonicSensor usLeft, Odometer odometer) {
 	    	
-	    	this.odometer = odometer;
+	    this.odometer = odometer;
 		this.navigation = odometer.getNavigation();
-		detection = new Detection(colorSensor, us);
+		detection = new Detection(colorSensor, usRight, usLeft, MAX_DISTANCE);
+		//initializeMap();
 	}
 
 
@@ -57,9 +57,10 @@ public class FlagCapturer {
 	 * @param FinalPosCoords The <code>int</code> positions of the area where the flag is
 	 */
 	public void captureFlag(int[] FlagPosCoords, int[] FinalPosCoords) {
-	    
+		
+		
+	    pathToFlag(90, 90);
 	}
-	
 	
 	
 	/*
@@ -81,20 +82,20 @@ public class FlagCapturer {
 	 * 
 	 * 
 	 */
-
+/*
 	private void findPath(int direction, int length, double XDest, double YDest) {
 		int tempL = 0;
 		while((( direction == 2 || direction == 3) && (tempL < length)) || 
 				((direction == 0) && (odometer.getX() <= XDest)) || 
 				((direction == 1) && (odometer.getY() <= YDest))){
 			
-			if (detection.getDistance() < MAX_DISTANCE) {
+			if (detection.wallInFront()) {
 				if (direction == 0 || direction == 1) {
 					if (direction == 0) {
 						navigation.turnTo(90, true);
-						if (detection.getDistance() < MAX_DISTANCE) {
+						if (detection.wallInFront()) {
 							navigation.turnTo(180, true);
-							if (detection.getDistance() < MAX_DISTANCE) {
+							if (detection.wallInFront()) {
 								navigation.turnTo(270, true);
 								findPath(3, 30, XDest, YDest);
 								findPath(0, UNTIL_END, XDest, YDest);
@@ -107,9 +108,9 @@ public class FlagCapturer {
 						findPath(1, UNTIL_END, XDest, YDest);
 					} else {
 						navigation.turnTo(0, true);
-						if (detection.getDistance() < MAX_DISTANCE) {
+						if (detection.wallInFront()) {
 							navigation.turnTo(180, true);
-							if (detection.getDistance() < MAX_DISTANCE) {
+							if (detection.wallInFront()) {
 								navigation.turnTo(270, true);
 								findPath(3, 30, XDest, YDest);
 								findPath(0, UNTIL_END, XDest, YDest);
@@ -129,25 +130,105 @@ public class FlagCapturer {
 	
 			switch (direction) {
 			case 0:
-				ver += 10;
+				ver += 30;
 				break;
 			case 1:
-				hor += 10;
+				hor += 30;
 				break;
 			case 2:
-				ver -= 10;
+				ver -= 30;
 				break;
 			case 3:
-				hor -= 10;
+				hor -= 30;
 				break;	
 			}
-			tempL+= 10;
+			tempL+= 30;
 			
 			navigation.travelTo(ver,hor);
 		}
 		return;
+	}*/
+	/*
+	 * Up = 0, Right = 1, Down = 2, Left = 3
+	 * 
+	 */
+	private void pathToFlag(double XDest, double YDest){
+		int direction = 0;
+		double XCheckPoint = 0;
+		double YCheckPoint = 0;
+		boolean atEndY = false;
+		boolean atEndX = false;
+		double counter = 0;
+		
+		while(odometer.getX() < XDest || odometer.getY() < YDest){
+
+			
+			while(!detection.wallInFront()){
+				if(atEndY && direction == 1 && counter == 0){
+					direction = 3;
+				}
+				if(direction == 3 && counter >= 1){
+					direction = 0;
+					counter = 0;
+					atEndY = false;
+				}
+				if(atEndX && direction == 0 && counter == 0 ){
+					direction = 2;
+				}
+				if(direction == 2 && counter >= 1){
+					direction = 1;
+					counter = 0;
+					atEndX = false;
+				}
+				switch (direction) {
+				case 0:
+					ver += 20;
+					break;
+				case 1:
+					hor += 20;
+					break;
+				case 2:
+					ver -= 20;
+					break;
+				case 3:
+					hor -= 20;
+					break;	
+				}
+				counter++;
+				XCheckPoint = odometer.getX();
+				YCheckPoint = odometer.getY();
+				navigation.travelTo(ver, hor);
+				
+				if((odometer.getX() >= XDest) && direction == 0){
+					atEndX = true;
+				}
+				else if((odometer.getY() >= YDest) && direction == 1){
+					atEndY = true;
+				}
+			}
+			if(direction == 0){		
+				navigation.turnTo(90, true);
+				if(detection.wallInFront()){
+					ver = XCheckPoint;
+					hor = YCheckPoint;
+					navigation.travelTo(ver, hor);
+				}
+				direction = 1;
+			}
+			
+			else if (direction == 1){
+				navigation.turnTo(0, true);
+				if(detection.wallInFront()){
+					ver = XCheckPoint;
+					hor = YCheckPoint;
+					navigation.travelTo(YCheckPoint, XCheckPoint);
+				}
+				direction = 0;
+			}
+
+
+		}
 	}
-	
 	/*
 	 * This method is used to search for the flag when given the coordinates of the area the Flag is in
 	 */
@@ -167,4 +248,12 @@ public class FlagCapturer {
 	private void grabFlag(){
 	    
 	}
+	private void initializeMap(){
+		for(int i = 0; i < isValidMapPoint.length; i++){
+			for(int j = 0; j < isValidMapPoint[0].length; j++){
+				isValidMapPoint[i][j] = true;
+			}
+		}
+	}
+	
 }

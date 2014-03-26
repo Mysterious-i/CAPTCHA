@@ -19,19 +19,22 @@ import lejos.nxt.UltrasonicSensor;
 public class Detection {
 	
 	private ColorSensor colorSensor;
-	private UltrasonicSensor us;
-	
+	private UltrasonicSensor usRight, usLeft;
+	private final int MAX_DISTANCE;
 	/**
 	 * Constructor that initiliazes the Detection object which sotres the color and ultrasonic sensors as well
 	 * as sets the floodlight of the color sensor on.
 	 *  
 	 * @param colorSensor A color sensor used for the robot to differentiate objects by their color
-	 * @param us A ultrasonic sensor used for the robot to determine teh distance from the object
+	 * @param us The right ultrasonic sensor used for the robot to determine the distance from the object
+	 * @param us The left ultrasonic sensor used for the robot to determine the distance from the object
 	 */
 	
-	public Detection(ColorSensor colorSensor, UltrasonicSensor us){
+	public Detection(ColorSensor colorSensor, UltrasonicSensor usRight, UltrasonicSensor usLeft, int MAX_DISTANCE){
 		this.colorSensor = colorSensor;
-		this.us = us;
+		this.usRight = usRight;
+		this.usLeft = usLeft;
+		this.MAX_DISTANCE = MAX_DISTANCE;
 		this.colorSensor.setFloodlight(true);
 	}
 	
@@ -47,11 +50,25 @@ public class Detection {
 	
         
         /**
-         * Returns the <code>int</code> distance read by the ultrasonic sensor
-         * @return the <code>int</code> distance read by the ultrasonic sensor
+         * Returns the <code>int</code> distance read by the right ultrasonic sensor
+         * @return the <code>int</code> distance read by the right ultrasonic sensor
          */
-	public int getDistance(){
-		 return us.getDistance();
+	public int getRightDistance(){ 
+		 return usRight.getDistance();
+	}
+	    /**
+	     * Returns the <code>int</code> distance read by the left ultrasonic sensor
+	     * @return the <code>int</code> distance read by the left ultrasonic sensor
+	     */
+	public int getLeftDistance(){
+		 return usLeft.getDistance();
+	}
+    /**
+     * Returns a <code>boolean</code> true if either sensor sees a wall in front of it
+     * @return a <code>boolean</code> true if either sensor sees a wall in front of it
+     */
+	public boolean wallInFront(){
+		return ((getRightDistance() < MAX_DISTANCE) || (getLeftDistance() < MAX_DISTANCE));
 	}
 	
 	/**Method that calculates the block type depending on the distance read by the
@@ -61,7 +78,7 @@ public class Detection {
 	 * @return the <code>String</code> name of the type of block that
 	 * is currently in front of the sensors
 	 */
-	public String getBlockType(){
+	/*public String getBlockType(){
 		String s;
 		if(us.getDistance() < 26){
 			if(getColor() > 26){
@@ -75,14 +92,14 @@ public class Detection {
 		
 		return s;
 	}
-	
+	*/
 	/**Returns a number representing the different block types depending.
 	 * 0 - No Block, 
 	 * 1 - Wall Block, 
 	 * 2 - Blue Block
 	 * 
 	 * @return the <code>int</code> number that represents the block
-	 */
+	 *//*
 	public int getBlockNumber(){
 		String s;
 		s = getBlockType();
@@ -93,5 +110,5 @@ public class Detection {
 			return 1;
 		}
 		return 0;
-	}
+	}*/
 }

@@ -24,7 +24,7 @@ import lejos.nxt.UltrasonicSensor;
 public class USLocalizer {
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	private static double FORWARD_SPEED = 9;
-	private static double ROTATION_SPEED = 53;
+	private static double ROTATION_SPEED = 60;
 	private final int d = 45;
 	private final int k = 6;
 	private Odometer odo;
@@ -142,17 +142,15 @@ public class USLocalizer {
 		
 		//Move the robot to the nearest cross section of lines
 		
-		//TODO change the numbers and fill it in below in COMMENT
-		
 		/*First we turn the robot so it is facing the wall on its left and move it back
 		 * till its a certain distance ( in this case) from the wall.
 		 */
-         navigation.turnTo(-90, true);
-         while (getFilteredData() >= 27 || getFilteredData() <= 25) {
-            if (getFilteredData() >= 27) {
-                robot.setSpeeds(FORWARD_SPEED, 0);
-            } else if (getFilteredData() <= 25) {
+         navigation.turnTo(90, true);
+         while (getFilteredData() >= 24 || getFilteredData() <= 22) {
+            if (getFilteredData() >= 24) {
                 robot.setSpeeds(-FORWARD_SPEED, 0);
+            } else if (getFilteredData() <= 24) {
+                robot.setSpeeds(FORWARD_SPEED, 0);
             } else {
                 robot.setSpeeds(0, 0);
             }
@@ -161,19 +159,19 @@ public class USLocalizer {
          /*Then we turn the robot again to make it face the back wall and move it back
           * till its a a certain distance ( in this case) from the wall.
           */
-         navigation.turnTo(180, true);
-         while (getFilteredData() >= 27 || getFilteredData() <= 25) {
-            if (getFilteredData() >= 27) {
-                robot.setSpeeds(FORWARD_SPEED, 0);
-            } else if (getFilteredData() <= 25) {
+         navigation.turnTo(0, true);
+         while (getFilteredData() >= 24 || getFilteredData() <= 22) {
+            if (getFilteredData() >= 24) {
                 robot.setSpeeds(-FORWARD_SPEED, 0);
+            } else if (getFilteredData() <= 24) {
+                robot.setSpeeds(FORWARD_SPEED, 0);
             } else {
                 robot.setSpeeds(0, 0);
             }
          }
            
          // Turn the robot 45 degrees so it is not on top of a line to start with
-         navigation.turnTo (0, true);
+         navigation.turnTo (185, true);
          odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
          
 		}
