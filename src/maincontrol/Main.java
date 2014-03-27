@@ -1,6 +1,10 @@
 package maincontrol;
 import java.io.IOException;
 
+import bluetooth.BluetoothConnection;
+import bluetooth.PlayerRole;
+import bluetooth.StartCorner;
+import bluetooth.Transmission;
 import capture.FlagCapturer;
 import traveling.Odometer;
 import lejos.nxt.*;
@@ -24,7 +28,6 @@ import maincontrol.NXTLCPRespond.Responder;
  * 
  * This class directly communicates with the instance of the <code>LCDInfo</code> class for
  * printing on the NXT brick screen.
- * 
  * @author  Alessandro Parisi
  * @version 1.0
  * @since   1.0
@@ -34,7 +37,8 @@ public class Main {
 
     private static int[] FinalPosCoords = {0};
 
-    private static int[] FlagPosCoords = {0};
+    private static int[] FlagPosCoords = {4, 4, 6, 6};
+    private static int color = 1;
     
     private static Odometer odometer;
     private static USLocalizer usl;
@@ -47,7 +51,6 @@ public class Main {
      * It waits for the user to clicks the button left on the NXT brick and then starts.
      * It exists if they clikc the exit button on the NXT brick.
      * 
-     * @param args
      */
 	public static void main(String[] args) {
 		
@@ -55,27 +58,58 @@ public class Main {
 		//Create the slave NXT
 		RemoteNXT slaveNXT = null;
 		try {
-			slaveNXT = new RemoteNXT("NXT", RS485.getConnector());
+			slaveNXT = new RemoteNXT("TEAM11-2", RS485.getConnector());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
+		
+		//Bluetooth Sample Code
+		BluetoothConnection conn = new BluetoothConnection();
+		
+		// as of this point the bluetooth connection is closed again, and you can pair to another NXT (or PC) if you wish
+		
+		// example usage of Tranmission class
+		Transmission t = conn.getTransmission();
+		if (t == null) {
+			LCD.drawString("Failed to read transmission", 0, 5);
+		} else {
+			PlayerRole role = t.role;
+			StartCorner corner = t.startingCorner;
+			int redZoneBottomLeft_X = t.redZoneLL_X;
+			int redZoneBottomLeft_Y = t.redZoneLL_Y;
+			int redZoneTopLeft_X = t.redZoneUR_X;			
+			int redZoneTopLeft_Y = t.redZoneUR_Y;
+			int	redFlag = t.redFlag;
+			
+			FlagPosCoords[0] = redZoneBottomLeft_X;
+			FlagPosCoords[1] = redZoneBottomLeft_Y;
+			FlagPosCoords[2] = redZoneTopLeft_X;
+			FlagPosCoords[3] = redZoneTopLeft_Y;
+			
+			color = redFlag;
+			// print out the transmission information
+			conn.printTransmission();
+		}
+		
 		//Initialize the slave's ports
 		//TODO the Color sensor is undefined for slave so make sure ports are good
-		ColorSensor detectionSensor = new ColorSensor(SensorPort.S4);
+		ColorSensor detectionSensor = new ColorSensor(SensorPort.S3);
 		UltrasonicSensor usRight = new UltrasonicSensor(slaveNXT.S2);
 		UltrasonicSensor usLeft = new UltrasonicSensor(slaveNXT.S3);
 		RemoteMotor grabberRight = slaveNXT.A;
-		RemoteMotor grabberLeft = slaveNXT.B;
+		RemoteMotor  grabberLeft = slaveNXT.B;
 		
 		//Initilize the master's ports
-		LightSensor odometerCorrectionRight = new LightSensor(SensorPort.S1);
-		LightSensor odometerCorrectionLeft = new LightSensor(SensorPort.S2);
+		ColorSensor odometerCorrectionRight = new ColorSensor(SensorPort.S1);
+		ColorSensor odometerCorrectionLeft = new ColorSensor(SensorPort.S2);
 		
 		// setup the odometer, display, and ultrasonic and light sensors
 
 		odometer = new Odometer(true, odometerCorrectionRight, odometerCorrectionLeft);
-		FlagCapturer flagCapturer = new FlagCapturer(detectionSensor, usRight, usLeft, odometer);
+		FlagCapturer flagCapturer = new FlagCapturer(detectionSensor, usRight, usLeft, odometer, grabberRight, grabberLeft);
 		
 		do {
 			// clear the display
@@ -97,18 +131,19 @@ public class Main {
 			LCD.clear();
 			
 
-			//usl = new USLocalizer (odometer, usRight, USLocalizer.LocalizationType.RISING_EDGE);
-			//usl.doLocalization();
+			usl = new USLocalizer (odometer, usRight, USLocalizer.LocalizationType.RISING_EDGE, odometerCorrectionRight, odometerCorrectionLeft);
+			usl.doLocalization();
 			
 			//Switch the mode of the ultrasonic sensor to coninuous because it was in ping mode for the localization
 			usRight.continuous();
+			usLeft.continuous();
 			
 			odometer.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
 			odometer.setAng(0);
 			
 			//NavigationTest navTest = new NavigationTest(odometer);
 			//navTest.goInASquare();
-			flagCapturer.captureFlag(FlagPosCoords, FinalPosCoords);
+			flagCapturer.captureFlag(FlagPosCoords, FinalPosCoords, color);
 			
 		}while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		

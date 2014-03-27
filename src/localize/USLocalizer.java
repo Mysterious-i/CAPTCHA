@@ -1,9 +1,11 @@
 package localize;
 import traveling.Navigation;
 import traveling.Odometer;
+import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
+import lejos.util.Delay;
 
 /**
  * The class <code>USLocalizer</code> can preform ultrasonic localization 
@@ -33,6 +35,7 @@ public class USLocalizer {
 	private LocalizationType locType;
 	private int numberOfReadings = 0;
 	private Navigation navigation;
+	ColorSensor odoL, odoR;
 	
 	/**
 	 * The construct of the <code>USLocalizer</code> class initaliazes the intances of the classes
@@ -45,13 +48,14 @@ public class USLocalizer {
 	 * @param locType the <code>LocalizationType</code> that was chosen to be used for this
 	 * instance of localization
 	 */
-	public USLocalizer(Odometer odo, UltrasonicSensor us, LocalizationType locType) {
+	public USLocalizer(Odometer odo, UltrasonicSensor us, LocalizationType locType, ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
 		this.odo = odo;
 		robot = new TwoWheeledRobot(Motor.A, Motor.B);
 		this.us = us;
 		this.locType = locType;
 		this.navigation = odo.getNavigation();
-		
+		this.odoL = odometerCorrectionLeft;
+		this.odoR = odometerCorrectionRight;
 	}
 	
 	/**Preforms a certain localization technic depending on whether ther user wants 
@@ -146,10 +150,10 @@ public class USLocalizer {
 		 * till its a certain distance ( in this case) from the wall.
 		 */
          navigation.turnTo(90, true);
-         while (getFilteredData() >= 24 || getFilteredData() <= 22) {
-            if (getFilteredData() >= 24) {
+         while (getFilteredData() >= 22 || getFilteredData() <= 20) {
+            if (getFilteredData() >= 22) {
                 robot.setSpeeds(-FORWARD_SPEED, 0);
-            } else if (getFilteredData() <= 24) {
+            } else if (getFilteredData() <= 22) {
                 robot.setSpeeds(FORWARD_SPEED, 0);
             } else {
                 robot.setSpeeds(0, 0);
@@ -160,8 +164,8 @@ public class USLocalizer {
           * till its a a certain distance ( in this case) from the wall.
           */
          navigation.turnTo(0, true);
-         while (getFilteredData() >= 24 || getFilteredData() <= 22) {
-            if (getFilteredData() >= 24) {
+         while (getFilteredData() >= 20 || getFilteredData() <= 18) {
+            if (getFilteredData() >= 20) {
                 robot.setSpeeds(-FORWARD_SPEED, 0);
             } else if (getFilteredData() <= 24) {
                 robot.setSpeeds(FORWARD_SPEED, 0);
@@ -170,9 +174,34 @@ public class USLocalizer {
             }
          }
            
-         // Turn the robot 45 degrees so it is not on top of a line to start with
-         navigation.turnTo (185, true);
-         odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
+         // Turn the robot 180 degrees so it is not on top of a line to start with
+         navigation.turnTo (180, true);
+         
+         int ambientLeft = 0;
+         int ambientRight = 0;
+ 		for(int i = 0; i < 20; i++){
+ 			ambientLeft += odoL.getRawLightValue();
+ 			ambientRight += odoR.getRawLightValue();
+ 			Delay.msDelay(10);	
+ 		}
+ 		odoL.setFloodlight(true);
+ 		odoR.setFloodlight(true);
+ 		
+         while(odoL.getRawLightValue() > ambientLeft* 0.8 && odoR.getRawLightValue() > ambientRight* 0.8){
+        	 robot.setForwardSpeed(-5);
+         }
+         robot.setSpeeds(0, 0);
+         Sound.beep();
+         while(odoL.getRawLightValue() > ambientLeft* 0.8){
+        	 robot.setRotationSpeed(-ROTATION_SPEED);
+         }
+         Sound.beep();
+         while(odoR.getRawLightValue() > ambientRight* 0.8){
+        	 robot.setRotationSpeed(-ROTATION_SPEED);
+         }
+         Sound.beep();
+         
+         odo.setPosition(new double [] {6.4, 0.0, 0.0}, new boolean [] {true, true, true});
          
 		}
 	
@@ -304,7 +333,7 @@ public class USLocalizer {
 		 */
 		
         if(angleMid < angleMid2){
-            navigation.turnTo(-222 + (angleMid + angleMid2)/2, true);
+            navigation.turnTo(-216 + (angleMid + angleMid2)/2, true);
         }else{
             navigation.turnTo(-46 + (angleMid + angleMid2)/2, true);
         } 

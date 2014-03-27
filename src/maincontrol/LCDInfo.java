@@ -22,7 +22,7 @@ public class LCDInfo implements TimerListener{
 	/**
 	 * The constructor of the <code>LCDInfo</code> class will initiate the <code>Odometer</code>,
 	 * and <code>Timer</code>. It then starts the <code>Timer</code>
-	 * @param odo
+	 * @param odo The <code>odometer</code> instance use to update the LCD
 	 */
 	public LCDInfo(Odometer odometer) {
 		this.lcdTimer = new Timer(LCD_REFRESH, this);

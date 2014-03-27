@@ -63,8 +63,10 @@ public class Navigation {
         return convertDistance(radius, Math.PI * width * angle / 360.0);
     }
     
-    /*
-     * Functions to set the motor speeds jointly
+    /**
+     * Functions to set the motor speeds jointly for
+     * @param lSpd The <code>float</code > speed of the left motor
+     * @param rSpd The <code>float</code > speed of the right motor
      */
     public void setSpeeds(float lSpd, float rSpd) {
         this.leftMotor.setSpeed(Math.abs(lSpd));
@@ -78,7 +80,13 @@ public class Navigation {
         else
             this.rightMotor.forward();
     }
- 
+
+    /**
+     * Functions to set the motor speeds jointly for
+     * @param lSpd The <code>int</code > speed of the left motor
+     * @param rSpd The <code>int</code > speed of the right motor
+     */
+  
     public void setSpeeds(int lSpd, int rSpd) {
         this.leftMotor.setSpeed(Math.abs(lSpd));
         this.rightMotor.setSpeed(Math.abs(rSpd));
@@ -92,7 +100,7 @@ public class Navigation {
             this.rightMotor.forward();
     }
  
-    /*
+    /**
      * Float the two motors jointly
      */
     public void setFloat() {
@@ -198,6 +206,7 @@ public class Navigation {
         isTurning = false;
     }
      
+    
     /**
      * This method makes to robot go foward a set travelDis in cm
      * 
@@ -207,7 +216,14 @@ public class Navigation {
         this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng())) * travelDis, Math.cos(Math.toRadians(this.odometer.getAng())) * travelDis);
  
     }
-    
+    /**
+     * This method makes to robot go forward slowly a set travelDis in cm
+     * 
+     * @param speed The <code> int </code> speed that the robot will travel at
+     */
+    public void goForwardSpeed(int speed) {
+        this.setSpeeds(speed, speed);
+    }
     /**
      * This method returns the <code>boolean</code> value that keeps track whether the
      * robot is currently turning.

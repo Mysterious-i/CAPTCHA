@@ -2,13 +2,23 @@ package localize;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class TwoWheeledRobot {
+	/** 
+	 * The class <code>TwoWheeledRobot</code> is used to control the driver wheel of the robot.
+	 */
     private static final double DEFAULT_LEFT_RADIUS = 2.75;
     private static final double DEFAULT_RIGHT_RADIUS = 2.75;
     private static final double DEFAULT_WIDTH = 15.8;
     private NXTRegulatedMotor leftMotor, rightMotor;
     private double leftRadius, rightRadius, width;
     private double forwardSpeed, rotationSpeed;
-      
+    /**
+     * The constructor for the two wheel robot class to move the robot in ultrasonic navigation
+     * @param leftMotor The left <code>NXTRegulatedMotor</code> of the robot
+     * @param rightMotor The right <code>NXTRegulatedMotor</code> of the robot
+     * @param width The <code>double</code> distance between the two wheel
+     * @param leftRadius The <code>double</code> radius of the right wheel
+     * @param rightRadius The <code>double</code> radius of the left wheel
+     */
     public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
                            NXTRegulatedMotor rightMotor,
                            double width,

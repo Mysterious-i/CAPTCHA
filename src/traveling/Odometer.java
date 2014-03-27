@@ -43,14 +43,14 @@ public class Odometer implements TimerListener {
       * origin with angle 0. The <code>boolean</code> start will determine whether the 
       * <code>Odometer</code> timer will start in the constructer.
       * 
-      * @param period the <code>int</code> period that will determine the rate at which
+      * @param period The <code>int</code> period that will determine the rate at which
       * the odometer timer is called
-      * @param start the <code>boolean</code> value which determines whether the odometer
+      * @param start The <code>boolean</code> value which determines whether the odometer
       * will star the timer
-      * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
-      * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
+      * @param odometerCorrectionLeft The left <code>ColorSensor</code> that will be used for odometry correction
+      * @param odometerCorrectionRight The right <code>ColorSensor</code> that will be used for odometry correction
       */
-    public Odometer(int period, boolean start, LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+    public Odometer(int period, boolean start, ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
         
         this.navigation = new Navigation(this);
        // odometryCorrection = new OdometryCorrection(this, odometerCorrectionLeft, odometerCorrectionRight);
@@ -84,10 +84,10 @@ public class Odometer implements TimerListener {
      * <code>OdometryCorrection</code>. Finally it sets the inital position of the robot to the 
      * origin with angle 0 and 
      * 
-     * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
-     * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionLeft The left <code>ColorSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionRight The right <code>ColorSensor</code> that will be used for odometry correction
      */
-    public Odometer(LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+    public Odometer(ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
         this(DEFAULT_PERIOD, false, odometerCorrectionLeft, odometerCorrectionRight);
     }
       
@@ -100,10 +100,10 @@ public class Odometer implements TimerListener {
      * 
      * @param start the <code>boolean<code> value that determines whther the odometer timer will start
      * in the constructor
-     * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
-     * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionLeft The left <code>ColorSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionRight The right <code>ColorSensor</code> that will be used for odometry correction
      */
-    public Odometer(boolean start, LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+    public Odometer(boolean start, ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
         this(DEFAULT_PERIOD, start, odometerCorrectionLeft, odometerCorrectionRight);
     }
       
@@ -116,10 +116,10 @@ public class Odometer implements TimerListener {
      * 
      * @param period the <code>int</code> period that will determine the rate at which
      * the odometer timer is called
-     * @param odometerCorrectionLeft the <code>LightSensor</code> that will be used for odometry correction
-     * @param odometerCorrectionRight the <code>LightSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionLeft the <code>ColorSensor</code> that will be used for odometry correction
+     * @param odometerCorrectionRight the <code>ColorSensor</code> that will be used for odometry correction
      */
-    public Odometer(int period, LightSensor odometerCorrectionLeft, LightSensor odometerCorrectionRight) {
+    public Odometer(int period, ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
         this(period, false, odometerCorrectionLeft, odometerCorrectionRight);
     }
   
@@ -157,7 +157,7 @@ public class Odometer implements TimerListener {
     }
     
     /**
-     * Returns teh x of the robot
+     * Returns the x of the robot
      * @return the <code>double</code> x of the robot
      */
     public double getX() {
@@ -166,7 +166,7 @@ public class Odometer implements TimerListener {
         }
     }
     /**
-     * Returns teh y of the robot
+     * Returns the y of the robot
      * @return the <code>double</code> y of the robot
      */
     public double getY() {
@@ -175,7 +175,7 @@ public class Odometer implements TimerListener {
         }
     }
     /**
-     * Returns teh angle of the robot
+     * Returns the angle of the robot
      * @return the <code>double</code> angle of the robot
      */
     public double getAng() {
@@ -209,8 +209,8 @@ public class Odometer implements TimerListener {
       
     // accessors to motors
     	/**
-    	 * Returns the motors of the robot
-    	 * @return the motors of the robot
+    	 * Returns the motors array of the robot
+    	 * @return the motors array of the robot
     	 */
         public NXTRegulatedMotor [] getMotors() {
             return new NXTRegulatedMotor[] {this.leftMotor, this.rightMotor};
@@ -230,7 +230,7 @@ public class Odometer implements TimerListener {
             return this.rightMotor;
         }
     	/**
-    	 * Returns the navgiation of the robot
+    	 * Returns the navigation of the robot
     	 * @return the <code>Navigation</code> of the robot
     	 */
         public Navigation getNavigation() {
@@ -241,7 +241,7 @@ public class Odometer implements TimerListener {
      * 
      * @param pos the <code>double</code> position array which will be used to update
      * the x y and angle of the odometer 
-     * @param update the <code>boolean</code> array that tells you which elements in the position
+     * @param update the <code>boolean</code> array that indicate which elements in the position
      * array need to be updated 
      */
     public void setPosition(double [] pos, boolean [] update) {
@@ -261,7 +261,7 @@ public class Odometer implements TimerListener {
     }
       
     //This method calculates the minimum angle from two doubles
-    private static double minimumAngleFromTo(double a, double b) {
+    private static double s(double a, double b) {
         double d = fixDegAngle(b - a);
           
         if (d < 180.0)
