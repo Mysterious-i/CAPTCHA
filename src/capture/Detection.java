@@ -27,6 +27,11 @@ public class Detection {
 	private UltrasonicSensor usRight;
 	private UltrasonicSensor usLeft;
 	private final int MAX_DISTANCE;
+	private int[] pollingRight = new int[10];
+	private int[] pollingLeft = new int[10];
+	private int countLeft = 0, countRight = 0;
+	
+	
 
 	/**
 	 * Constructor that initiliazes the Detection object which sorts the color
@@ -51,6 +56,11 @@ public class Detection {
 		this.usRight = usRight;
 		this.usLeft = usLeft;
 		this.MAX_DISTANCE = MAX_DISTANCE;
+
+		for (int i = 0; i < 10; i++) {
+			pollingRight[i] = 255;
+			pollingLeft[i] = 255;
+		}
 	}
 
 	/**
@@ -102,11 +112,58 @@ public class Detection {
 	}
 
 	/**
+	 * Returns the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings
+	 * 
+	 * @return the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings
+	 */
+	public int getAverageLeftDistance() {
+		
+		int average = getAverageDistance(usLeft, 10);
+
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return average;
+	}
+
+	/**
+	 * Returns the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings and 1 extra ping is added
+	 * 
+	 * @return the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings and 1 extra ping is added
+	 */
+	public int getLeftDistance() {
+		int average = 0;
+
+		countLeft++;
+
+		if (countLeft > 9) {
+			countLeft = 0;
+		}
+
+		pollingLeft[countLeft] = usLeft.getDistance();
+
+		for (int i = 0; i < 10; i++) {
+			average += pollingLeft[i];
+		}
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return average / 10;
+	}
+	/**
 	 * Returns the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings
 	 * 
 	 * @return the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings
 	 */
-	public int getRightDistance() {
+	public int getAverageRightDistance() {
+		
 		int average = getAverageDistance(usRight, 10);
 		try {
 			Thread.sleep(100);
@@ -115,6 +172,33 @@ public class Detection {
 			e.printStackTrace();
 		}
 		return average;
+	}
+	/**
+	 * Returns the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings and 1 extra ping is added
+	 * 
+	 * @return the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings and 1 extra ping is added
+	 */
+	public int getRightDistance() {
+		int average = 0;
+
+		countRight++;
+
+		if (countRight > 9) {
+			countRight = 0;
+		}
+
+		pollingRight[countRight] = usRight.getDistance();
+
+		for (int i = 0; i < 10; i++) {
+			average += pollingRight[i];
+		}
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return average / 10;
 	}
 	/**
 	 * Returns the <code>int</code> distance read by the left ultrasonic sensor from one ping
@@ -132,21 +216,7 @@ public class Detection {
 	public int getRightDistanceOnce() {
 		return usRight.getDistance();
 	}
-	/**
-	 * Returns the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings
-	 * 
-	 * @return the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings
-	 */
-	public int getLeftDistance() {
-		int average = getAverageDistance(usLeft, 10);
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return average;
-	}
+	
 	/**
 	 * Returns the <code>int</code> average distance read by the ultrasonic sensor after n readings
 	 * 
