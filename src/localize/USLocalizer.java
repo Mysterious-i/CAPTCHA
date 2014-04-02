@@ -27,8 +27,8 @@ public class USLocalizer {
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	private static double FORWARD_SPEED = 9;
 	private static double ROTATION_SPEED = 60;
-	private final int d = 45;
-	private final int k = 6;
+	private final int d = 55;
+	private final int k = 8;
 	private Odometer odo;
 	private TwoWheeledRobot robot;
 	private UltrasonicSensor us;

@@ -16,6 +16,7 @@ import lejos.nxt.comm.RConsole;
  * @see FlagCapture
  * 
  * @author Alessandro Parisi
+ * @author Stefan T
  * @since 1.0
  * @version 1.0
  * 
@@ -101,23 +102,63 @@ public class Detection {
 	}
 
 	/**
-	 * Returns the <code>int</code> distance read by the right ultrasonic sensor
+	 * Returns the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings
 	 * 
-	 * @return the <code>int</code> distance read by the right ultrasonic sensor
+	 * @return the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings
 	 */
 	public int getRightDistance() {
-		return usRight.getDistance();
+		int average = getAverageDistance(usRight, 10);
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return average;
 	}
-
 	/**
-	 * Returns the <code>int</code> distance read by the left ultrasonic sensor
+	 * Returns the <code>int</code> distance read by the left ultrasonic sensor from one ping
 	 * 
-	 * @return the <code>int</code> distance read by the left ultrasonic sensor
+	 * @return the <code>int</code> distance read by the left ultrasonic sensor from one ping
 	 */
-	public int getLeftDistance() {
+	public int getLeftDistanceOnce() {
 		return usLeft.getDistance();
 	}
-
+	/**
+	 * Returns the <code>int</code> distance read by the right ultrasonic sensor from one ping
+	 * 
+	 * @return the <code>int</code> distance read by the right ultrasonic sensor from one ping
+	 */
+	public int getRightDistanceOnce() {
+		return usRight.getDistance();
+	}
+	/**
+	 * Returns the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings
+	 * 
+	 * @return the <code>int</code> average distance read by the left ultrasonic sensor after 10 pings
+	 */
+	public int getLeftDistance() {
+		int average = getAverageDistance(usLeft, 10);
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return average;
+	}
+	/**
+	 * Returns the <code>int</code> average distance read by the ultrasonic sensor after n readings
+	 * 
+	 * @return the <code>int</code> average distance read by the ultrasonic sensor after n readings
+	 */
+	public int getAverageDistance(UltrasonicSensor us, int n) {
+		int sum = 0;
+		for(int i = 0; i < n; i++){
+			sum += us.getDistance();
+		}
+		return sum/n;
+	}
 	/**
 	 * Returns a <code>boolean</code> true if either sensor sees a wall in front
 	 * of it
@@ -182,12 +223,7 @@ public class Detection {
 	public int getBlockNumber() {
 
 		String s;
-		RConsole.open();
-
 		s = getBlockType();
-
-		RConsole.println(s);
-		RConsole.close();
 
 		if (s.equals("light blue"))
 			return 1;

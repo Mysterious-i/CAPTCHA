@@ -21,13 +21,13 @@ public class OdometryCorrection extends Thread {
 	private static final long CORRECTION_PERIOD = 10;
 	private Odometer odometer;
 	private Navigation navigation;
-	private static ColorSensor leftCS;
-	private static ColorSensor rightCS;
+	private ColorSensor leftCS;
+	private ColorSensor rightCS;
 	
 	//variables
-	private final double LEFT_LIGHT_THRESHOLD = 0.8, RIGHT_LIGHT_THRESHOLD = 0.87;
-	private final static double X_OFFSET = 6.4;
-	private final static double Y_OFFSET = 7.2;
+	private final double LEFT_LIGHT_THRESHOLD = 0.85, RIGHT_LIGHT_THRESHOLD = 0.87;
+	private final static double X_OFFSET = 7.3;
+	private final static double Y_OFFSET = 7.3;
 	
 	// constructor
 	

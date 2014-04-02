@@ -30,12 +30,13 @@ import lejos.nxt.Sound;
  *
  */
 public class Navigation {
-    private final static int FAST = 200, SLOW = 100, ACCELERATION = 4000, MID = 160;
+    private final static int FAST = 300, SLOW = 150, ACCELERATION = 4000, MID = 250;
     private final static double DEG_ERR = 5.0, CM_ERR = 1.0;
     private final double wheelRadius = -2.1, width = 17.25;
     private Odometer odometer;
     private NXTRegulatedMotor leftMotor, rightMotor;
     private boolean isTurning = false;
+    private boolean repeat = false;
      
     /**
      * The constructor of this class will initiate the motors and <code>Odometer</code>
@@ -119,8 +120,13 @@ public class Navigation {
      */
     public void travelTo(double x, double y) {
         
-	double dX, dY, angle, travelDis;
-	int tries = 0;
+    	double dX, dY, angle, travelDis, check;
+		int tries = 0;
+	
+		if (repeat)
+			repeat = false;
+		else
+			repeat = true;
 	
         //Get the x y and that we need to travel
         dX = x - odometer.getX();
@@ -133,7 +139,6 @@ public class Navigation {
         while (Math.abs(odometer.getAng() - angle) > DEG_ERR && tries < 10) {
             tries = tries + 1;
             turnTo(angle, true);
-            Sound.beep();
         }
                  
         //Make the wheels move slowly
@@ -149,6 +154,14 @@ public class Navigation {
         
         Motor.A.stop();
         Motor.B.stop();
+        
+        check = Math.abs(Math.pow((odometer.getX()-x), 2) - Math.pow((odometer.getX()-x), 2));
+        
+        if (repeat && check >= 1) {       
+        	travelTo(x, y);
+        }
+        	
+        
     }
  
     /**
@@ -182,8 +195,8 @@ public class Navigation {
             // if angle change is positive we move clockwise
             if (angleNeedToTravel > 0){
         	
-                Motor.A.setSpeed(MID);
-                Motor.B.setSpeed(MID);
+                Motor.A.setSpeed(SLOW);
+                Motor.B.setSpeed(SLOW);
                     
                 Motor.A.rotate(convertAngle(wheelRadius, width, Math.abs(angleNeedToTravel)), true);
                 Motor.B.rotate(-convertAngle(wheelRadius, width, Math.abs(angleNeedToTravel)), false);
@@ -192,8 +205,8 @@ public class Navigation {
             } 
             else {
         	
-            	Motor.A.setSpeed(MID);
-                Motor.B.setSpeed(MID);
+            	Motor.A.setSpeed(SLOW);
+                Motor.B.setSpeed(SLOW);
                     
                 Motor.A.rotate(-convertAngle(wheelRadius, width, Math.abs(angleNeedToTravel)), true);
                 Motor.B.rotate(convertAngle(wheelRadius, width, Math.abs(angleNeedToTravel)), false);

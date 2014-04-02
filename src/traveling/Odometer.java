@@ -53,7 +53,7 @@ public class Odometer implements TimerListener {
     public Odometer(int period, boolean start, ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
         
         this.navigation = new Navigation(this);
-       // odometryCorrection = new OdometryCorrection(this, odometerCorrectionLeft, odometerCorrectionRight);
+        //odometryCorrection = new OdometryCorrection(this, odometerCorrectionLeft, odometerCorrectionRight);
 
         odometerTimer = new Timer(period, this);
         leftMotor = Motor.A;

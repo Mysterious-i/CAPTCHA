@@ -35,10 +35,10 @@ import maincontrol.NXTLCPRespond.Responder;
  */
 public class Main {
 
-    private static int[] FinalPosCoords = {0};
+    private static int[] FinalPosCoords = {4, 4};
 
-    private static int[] FlagPosCoords = {4, 4, 6, 6};
-    private static int color = 1;
+    private static int[] FlagPosCoords = {0, 0, 3, 2};
+    private static int color = 4;
     
     private static Odometer odometer;
     private static USLocalizer usl;
@@ -67,12 +67,12 @@ public class Main {
 		
 		
 		//Bluetooth Sample Code
-		BluetoothConnection conn = new BluetoothConnection();
+		//BluetoothConnection conn = new BluetoothConnection();
 		
 		// as of this point the bluetooth connection is closed again, and you can pair to another NXT (or PC) if you wish
 		
 		// example usage of Tranmission class
-		Transmission t = conn.getTransmission();
+		/*Transmission t = conn.getTransmission();
 		if (t == null) {
 			LCD.drawString("Failed to read transmission", 0, 5);
 		} else {
@@ -80,7 +80,7 @@ public class Main {
 			StartCorner corner = t.startingCorner;
 			int redZoneBottomLeft_X = t.redZoneLL_X;
 			int redZoneBottomLeft_Y = t.redZoneLL_Y;
-			int redZoneTopLeft_X = t.redZoneUR_X;			
+			int redZoneTopLeft_X = t.redZoneUR_X;
 			int redZoneTopLeft_Y = t.redZoneUR_Y;
 			int	redFlag = t.redFlag;
 			
@@ -92,7 +92,7 @@ public class Main {
 			color = redFlag;
 			// print out the transmission information
 			conn.printTransmission();
-		}
+		}*/
 		
 		//Initialize the slave's ports
 		//TODO the Color sensor is undefined for slave so make sure ports are good
@@ -101,6 +101,8 @@ public class Main {
 		UltrasonicSensor usLeft = new UltrasonicSensor(slaveNXT.S3);
 		RemoteMotor grabberRight = slaveNXT.A;
 		RemoteMotor  grabberLeft = slaveNXT.B;
+	
+		
 		
 		//Initilize the master's ports
 		ColorSensor odometerCorrectionRight = new ColorSensor(SensorPort.S1);
@@ -130,9 +132,8 @@ public class Main {
 
 			LCD.clear();
 			
-
-			usl = new USLocalizer (odometer, usRight, USLocalizer.LocalizationType.RISING_EDGE, odometerCorrectionRight, odometerCorrectionLeft);
-			usl.doLocalization();
+			//usl = new USLocalizer (odometer, usRight, USLocalizer.LocalizationType.RISING_EDGE, odometerCorrectionRight, odometerCorrectionLeft);
+			//usl.doLocalization();
 			
 			//Switch the mode of the ultrasonic sensor to coninuous because it was in ping mode for the localization
 			usRight.continuous();
@@ -141,8 +142,6 @@ public class Main {
 			odometer.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
 			odometer.setAng(0);
 			
-			//NavigationTest navTest = new NavigationTest(odometer);
-			//navTest.goInASquare();
 			flagCapturer.captureFlag(FlagPosCoords, FinalPosCoords, color);
 			
 		}while (Button.waitForAnyPress() != Button.ID_ESCAPE);
