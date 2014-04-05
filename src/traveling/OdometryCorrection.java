@@ -92,7 +92,7 @@ public class OdometryCorrection extends Thread {
 				//	If the light value read by the ColorSensor is below the ambient light
 				//	by a percentage, the ColorSensor has crossed a grid line.
 				if (leftCS.getRawLightValue() < ambientLeft * LEFT_LIGHT_THRESHOLD) {
-					Sound.beep();
+					//Sound.beep();
 					
 					//	The temporary angle is the angle that the robot is currently at plus
 					//	the left offset angle.
@@ -119,7 +119,7 @@ public class OdometryCorrection extends Thread {
 				//	The following if statement is nearly identical to the one above. The right 
 				//	ColorSensor is polled instead of the left one.
 				if (rightCS.getRawLightValue() < ambientRight * RIGHT_LIGHT_THRESHOLD) {
-					Sound.twoBeeps();
+					//Sound.twoBeeps();
 					
 					//	The rightOffset is used to calculate the tempAngle instead of the leftOffset.
 					tempAngle = odometer.getAng()*Math.PI/180 + rightOffset;
@@ -159,7 +159,7 @@ public class OdometryCorrection extends Thread {
 
     // depending on the heading of the robot find the closest grid line it just crossed.
 	private static double getLine(double coordinate) {
-		return Math.round(coordinate / 30) * 30;
+		return Math.round(coordinate / 30.3) * 30.3;
 	}
 
 

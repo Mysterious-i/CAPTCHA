@@ -37,8 +37,8 @@ public class LCDInfo implements TimerListener{
 	 * {@inheritDoc}
 	 */
 	public void timedOut() { 
-		LCD.drawString("odo x   " + odometer.getX(), 0, 0);
-		LCD.drawString("odo y   " + odometer.getY(), 0, 1);
+		LCD.drawString("odo x : " + odometer.getX(), 0, 0);
+		LCD.drawString("odo y : " + odometer.getY(), 0, 1);
 
 	}
 }

@@ -53,7 +53,7 @@ public class Odometer implements TimerListener {
     public Odometer(int period, boolean start, ColorSensor odometerCorrectionLeft, ColorSensor odometerCorrectionRight) {
         
         this.navigation = new Navigation(this);
-        //odometryCorrection = new OdometryCorrection(this, odometerCorrectionLeft, odometerCorrectionRight);
+        odometryCorrection = new OdometryCorrection(this, odometerCorrectionLeft, odometerCorrectionRight);
 
         odometerTimer = new Timer(period, this);
         leftMotor = Motor.A;
@@ -73,7 +73,7 @@ public class Odometer implements TimerListener {
             odometerTimer.start();
         }
         
-        //odometryCorrection.start();
+       
     }
     
 
@@ -123,6 +123,12 @@ public class Odometer implements TimerListener {
         this(period, false, odometerCorrectionLeft, odometerCorrectionRight);
     }
   
+    public void startOdometryCorrection(){
+    	
+    	 odometryCorrection.start();
+    	
+    }
+    
       
     /**
      * It updates the x and y depending on the angle it is travelling at and past positions

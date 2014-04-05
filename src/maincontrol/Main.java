@@ -13,35 +13,38 @@ import lejos.nxt.remote.RemoteMotor;
 import lejos.nxt.remote.RemoteNXT;
 import lejos.util.Delay;
 import lejos.util.Timer;
-import localize.USLocalizer;
-import localize.USLocalizer.LocalizationType;
+import localize.Localizer;
 import maincontrol.NXTLCPRespond.Responder;
 
 /**
- * The <code>Main</code> class structures the different stages that need to be preformed
- * for the robot to succesfully capture a flag. This includes setting up the 
- * <code>Odometer</code>, preforming <code>USLocalization</code>, and then preforming
- * <code>FlagCapturer</code>.
+ * The <code>Main</code> class structures the different stages that need to be
+ * preformed for the robot to succesfully capture a flag. This includes setting
+ * up the <code>Odometer</code>, preforming <code>USLocalization</code>, and
+ * then preforming <code>FlagCapturer</code>.
  * 
- * An instance of this class will hold the coordinates that surround the area where the flag will be
- * and the coordinates that surround the area where the flag needs to be placed. 
+ * An instance of this class will hold the coordinates that surround the area
+ * where the flag will be and the coordinates that surround the area where the
+ * flag needs to be placed.
  * 
- * This class directly communicates with the instance of the <code>LCDInfo</code> class for
- * printing on the NXT brick screen.
- * @author  Alessandro Parisi
+ * This class directly communicates with the instance of the
+ * <code>LCDInfo</code> class for printing on the NXT brick screen.
+ * 
+ * @author Alessandro Parisi
  * @version 1.0
- * @since   1.0
- *
+ * @since 1.0
+ * 
  */
 public class Main {
 
-    private static int[] FinalPosCoords = {4, 4};
-
-    private static int[] FlagPosCoords = {0, 0, 3, 2};
-    private static int color = 4;
+	private static int[] FinalPosCoords = {4, 4};
+	private static int[] AvoidZone = {4,1};
+	private static int[] FlagPosCoordsLower = { 5, 5};
+	private static int[] FlagPosCoordsUpper = { 8, 7};
+	
+	private static int color = 4;
     
     private static Odometer odometer;
-    private static USLocalizer usl;
+    private static Localizer localizer;
     private static LCDInfo lcd;
     
     /**
@@ -65,35 +68,60 @@ public class Main {
 		}
 		
 		
-		
+		/*
 		//Bluetooth Sample Code
-		//BluetoothConnection conn = new BluetoothConnection();
+		BluetoothConnection conn = new BluetoothConnection();
 		
 		// as of this point the bluetooth connection is closed again, and you can pair to another NXT (or PC) if you wish
 		
 		// example usage of Tranmission class
-		/*Transmission t = conn.getTransmission();
+		Transmission t = conn.getTransmission();
 		if (t == null) {
 			LCD.drawString("Failed to read transmission", 0, 5);
 		} else {
 			PlayerRole role = t.role;
 			StartCorner corner = t.startingCorner;
-			int redZoneBottomLeft_X = t.redZoneLL_X;
-			int redZoneBottomLeft_Y = t.redZoneLL_Y;
-			int redZoneTopLeft_X = t.redZoneUR_X;
-			int redZoneTopLeft_Y = t.redZoneUR_Y;
-			int	redFlag = t.redFlag;
+
+			if(role.getId() == 2){	
+				
+				FlagPosCoordsLower[0] = t.redZoneLL_Y;
+				FlagPosCoordsLower[1] = t.redZoneLL_X;
+				FlagPosCoordsUpper[0] = t.redZoneUR_Y;
+				FlagPosCoordsUpper[1] = t.redZoneUR_X;
+				
+				FinalPosCoords[0] = t.redDZone_Y;
+				FinalPosCoords[1] = t.redDZone_X;
+				
+				AvoidZone[0] = t.greenDZone_Y;
+				AvoidZone[1] = t.greenDZone_X;
+				
+				color = t.redFlag;
+			}
+			else{
+				FlagPosCoordsLower[0] = t.greenZoneLL_Y;
+				FlagPosCoordsLower[1] = t.greenZoneLL_X;
+				FlagPosCoordsUpper[0] = t.greenZoneUR_Y;
+				FlagPosCoordsUpper[1] = t.greenZoneUR_X;
+				
+				FinalPosCoords[0] = t.greenDZone_Y;
+				FinalPosCoords[1] = t.greenDZone_X;
+				
+				AvoidZone[0] = t.redDZone_Y;
+				AvoidZone[1] = t.redDZone_X;
+				
+				color = t.greenFlag;
+			}
+
+			int id = t.startingCorner.getId();
+			FinalPosCoords = changeCoordinate(FinalPosCoords, id);
+			AvoidZone = changeCoordinate(AvoidZone, id);
+			FlagPosCoordsLower= changeCoordinate(FlagPosCoordsLower, id);
+			FlagPosCoordsUpper= changeCoordinate(FlagPosCoordsUpper, id);
 			
-			FlagPosCoords[0] = redZoneBottomLeft_X;
-			FlagPosCoords[1] = redZoneBottomLeft_Y;
-			FlagPosCoords[2] = redZoneTopLeft_X;
-			FlagPosCoords[3] = redZoneTopLeft_Y;
-			
-			color = redFlag;
 			// print out the transmission information
 			conn.printTransmission();
-		}*/
-		
+		}
+		*/
 		//Initialize the slave's ports
 		//TODO the Color sensor is undefined for slave so make sure ports are good
 		ColorSensor detectionSensor = new ColorSensor(SensorPort.S3);
@@ -132,8 +160,8 @@ public class Main {
 
 			LCD.clear();
 			
-			//usl = new USLocalizer (odometer, usRight, USLocalizer.LocalizationType.RISING_EDGE, odometerCorrectionRight, odometerCorrectionLeft);
-			//usl.doLocalization();
+			localizer = new Localizer (usLeft, usRight, odometer, odometerCorrectionLeft, odometerCorrectionRight);
+			localizer.localize();
 			
 			//Switch the mode of the ultrasonic sensor to coninuous because it was in ping mode for the localization
 			usRight.continuous();
@@ -141,13 +169,33 @@ public class Main {
 			
 			odometer.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
 			odometer.setAng(0);
+			odometer.startOdometryCorrection();
 			
-			flagCapturer.captureFlag(FlagPosCoords, FinalPosCoords, color);
+			flagCapturer.captureFlag(FlagPosCoordsLower, FlagPosCoordsUpper, FinalPosCoords, AvoidZone, color);
 			
 		}while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		
 		System.exit(0);		
 	}
 
+	private static int[] changeCoordinate(int[] coor,  int id) {
+		return changeCoordinate(coor[0] , coor[1], id);
+	}
+	
+	private static int[] changeCoordinate(int x, int y, int id) {
+		if (id == 1) {
+			return new int[] {x, y}; 
+		} else if (id == 2) {
+			return new int[] {y, 10 - x};
+		} else if (id == 3) {
+			return new int[] {10 - x, 10 - y};
+		} else if (id == 4) {
+			return new int[] {10 - y, x};
+		} else {
+			System.exit(1);
+			return null;
+		}
+	}
+	
 }
 
