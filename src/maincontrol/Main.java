@@ -36,12 +36,13 @@ import maincontrol.NXTLCPRespond.Responder;
  */
 public class Main {
 
-	private static int[] FinalPosCoords = {4, 4};
-	private static int[] AvoidZone = {4,1};
-	private static int[] FlagPosCoordsLower = { 5, 5};
-	private static int[] FlagPosCoordsUpper = { 8, 7};
-	
-	private static int color = 4;
+	private static int[] FinalPosCoords = {4, 2};
+	private static int[] AvoidZone = {4, 0};
+	private static int[] FlagPosCoordsLower = {7, 7};
+	private static int[] FlagPosCoordsUpper = {10, 9};
+
+	private int id = 3;
+	private static int color = 1;
     
     private static Odometer odometer;
     private static Localizer localizer;
@@ -163,6 +164,12 @@ public class Main {
 			localizer = new Localizer (usLeft, usRight, odometer, odometerCorrectionLeft, odometerCorrectionRight);
 			localizer.localize();
 			
+			
+			FinalPosCoords = changeCoordinate(FinalPosCoords, id);
+			AvoidZone = changeCoordinate(AvoidZone, id);
+			FlagPosCoordsLower= changeCoordinate(FlagPosCoordsLower, id);
+			FlagPosCoordsUpper= changeCoordinate(FlagPosCoordsUpper, id);
+			
 			//Switch the mode of the ultrasonic sensor to coninuous because it was in ping mode for the localization
 			usRight.continuous();
 			usLeft.continuous();
@@ -186,16 +193,15 @@ public class Main {
 		if (id == 1) {
 			return new int[] {x, y}; 
 		} else if (id == 2) {
-			return new int[] {y, 10 - x};
+			return new int[] {10 - y, x};
 		} else if (id == 3) {
 			return new int[] {10 - x, 10 - y};
 		} else if (id == 4) {
-			return new int[] {10 - y, x};
+			return new int[] {y, 10-x};
 		} else {
 			System.exit(1);
 			return null;
 		}
 	}
-	
 }
 

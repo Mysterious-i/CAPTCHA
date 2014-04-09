@@ -3,6 +3,7 @@ package capture;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
+import lejos.util.Delay;
 
 /**
  * The <code>Detection</code> class is used to manage the detection of all
@@ -54,7 +55,7 @@ public class Detection {
 		this.usRight = usRight;
 		this.usLeft = usLeft;
 		this.MAX_DISTANCE = MAX_DISTANCE;
-		
+
 		for (int i = 0; i < 10; i++) {
 			pollingRight[i] = 255;
 			pollingLeft[i] = 255;
@@ -116,12 +117,7 @@ public class Detection {
 	 */
 	public int getLeftDistance() {
 		int average = getAverageDistance(usLeft, 10);
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Delay.msDelay(100);
 		return average;
 	}
 	
@@ -132,16 +128,9 @@ public class Detection {
 	 */
 	public int getRightDistance() {
 		int average = getAverageDistance(usRight, 10);
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Delay.msDelay(100);
 		return average;
 	}
-	
-	
 	/**
 	 * Returns the <code>int</code> distance read by the left ultrasonic sensor from one ping
 	 * 

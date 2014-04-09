@@ -134,7 +134,7 @@ public class Navigation {
 	 * @param y
 	 *            The <code>double</code> y position of the robot
 	 */
-	public void travelTo(double x, double y) {
+	public void travelTo(double x, double y, boolean immediateRet) {
 
 		double dX, dY, angle, travelDis, check;
 		int tries = 0;
@@ -166,16 +166,12 @@ public class Navigation {
 
 		// Move the robot a certain distance and then stop the motors
 		Motor.A.rotate(convertDistance(wheelRadius, travelDis), true);
-		Motor.B.rotate(convertDistance(wheelRadius, travelDis), false);
+		Motor.B.rotate(convertDistance(wheelRadius, travelDis), immediateRet);
 
-		Motor.A.stop();
-		Motor.B.stop();
-
-		check = Math.abs(Math.pow((odometer.getX() - x), 2)
-				- Math.pow((odometer.getX() - x), 2));
+		check = Math.sqrt(Math.pow((odometer.getX() - x), 2) + Math.pow((odometer.getY() - y), 2));
 
 		if (repeat && check >= 1) {
-			travelTo(x, y);
+			travelTo(x, y, immediateRet);
 		}
 
 	}
@@ -253,7 +249,7 @@ public class Navigation {
 	public void goForward(double travelDis) {
 		this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng()))
 				* travelDis, Math.cos(Math.toRadians(this.odometer.getAng()))
-				* travelDis);
+				* travelDis, false);
 
 	}
 

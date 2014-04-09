@@ -36,7 +36,7 @@ public class Localizer {
 	private ColorSensor colorRight;
 	private Navigation navigation;
 	private int ambientLeft = 0, ambientRight = 0;
-	private static final int SPEED = 150; 
+	private static final int SPEED = 150;
 
 	public Localizer(UltrasonicSensor usLeft, UltrasonicSensor usRight,
 			Odometer odo, ColorSensor colorLeft, ColorSensor colorRight) {
@@ -55,18 +55,19 @@ public class Localizer {
 
 		boolean facingWall = false;
 		int distance;
+		int i = 0;
 		double angle[] = { 0, 0 };
+		int lightCount = 0;
 		usLeft.continuous();
 		Delay.msDelay(1000);
 		navigation.setSpeeds(SPEED, -SPEED);
 		distance = usLeft.getDistance();
-		if (distance < 45) {
+		if (distance < 50) {
 			Sound.buzz();
 			facingWall = true;
-			while (distance < 120)
-				distance = usLeft.getDistance();
-			Sound.buzz();
-			navigation.setSpeeds(-SPEED, SPEED);
+			while (distance < 90) {
+				distance = usLeft.getDistance();				
+			}
 		}
 		int count = 0;
 
@@ -79,7 +80,7 @@ public class Localizer {
 				count++;
 				Sound.beep();
 				Delay.msDelay(400);
-				while (distance < tempDistance + 2) {
+				while (distance < (tempDistance+10)) {
 					Delay.msDelay(50);
 					distance = usLeft.getDistance();
 
@@ -89,10 +90,13 @@ public class Localizer {
 				count++;
 			}
 			Delay.msDelay(20);
-			ambientRight = (ambientRight * 5 + colorRight.getRawLightValue()) / 6;
-			ambientLeft = (ambientLeft * 5 + colorLeft.getRawLightValue()) / 6;
+			ambientRight += colorLeft.getRawLightValue();
+			ambientLeft += colorLeft.getRawLightValue();
+			lightCount++;
 
 		}
+		ambientRight /= lightCount;
+		ambientLeft /= lightCount;
 		navigation.setSpeeds(0, 0);
 		navigation.turnTo((facingWall ? 180 : 0) + (angle[0] + angle[1]) / 2,
 				true);
@@ -110,7 +114,7 @@ public class Localizer {
 
 			}
 			ambientLeft /= 20;
-			ambientLeft /= 20;
+			ambientRight /= 20;
 
 		}
 		LCD.drawInt(ambientLeft, 0, 2);
@@ -121,13 +125,11 @@ public class Localizer {
 		int[] tone = new int[4];
 		int indexLeft = 0, indexRight = 0;
 		boolean leftLast = false;
-		boolean leftFirst = false;
 		while ((indexLeft + indexRight) < 2) {
 			if ((ambientLeft * 0.85 > colorLeft.getRawLightValue())
 					&& (indexLeft < 1)) {
 				leftX[indexLeft] = odo.getX();
 				tone[indexLeft + indexRight] = 330;
-				leftFirst = true;
 				indexLeft++;
 				Sound.playTone(330, 100);
 
@@ -137,12 +139,11 @@ public class Localizer {
 					&& indexRight < 1) {
 				rightX[indexRight] = odo.getX();
 				tone[indexLeft + indexRight] = 261;
-				leftFirst = false;
 				indexRight++;
 				Sound.playTone(261, 100);
 			}
 		}
-		Delay.msDelay(300);
+		Delay.msDelay(400);
 		while ((indexLeft + indexRight) < 3) {
 			if ((ambientLeft * 0.85 > colorLeft.getRawLightValue())
 					&& (indexLeft < 2)) {
@@ -189,12 +190,8 @@ public class Localizer {
 		double theta = (leftLast ? 180 : -90) + Math.toDegrees(dTheta);
 		navigation.turnTo(theta, true);
 		navigation.moveForward(SPEED, -y);
-		navigation.turnTo(Math.toDegrees(dTheta)+180, true);
+		navigation.turnTo(Math.toDegrees(dTheta) + 180, true);
 		Delay.msDelay(200);
-		// for (int i = 0; i < 12; i++) {
-		// Sound.playTone(tone[i % 4], 150);
-		// Delay.msDelay(160);
-		// }
 		odo.setAng(0);
 		odo.setX(0);
 		odo.setY(0);

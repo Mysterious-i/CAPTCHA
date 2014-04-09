@@ -14,12 +14,13 @@ public class UltrasonicPoller extends Thread {
 	private int[] pollingLeft = new int[NUMBER_OF_POLLS];
 	private int[] pollingRight = new int[NUMBER_OF_POLLS];
 	private boolean isThereAWall = false;
-	
+	private boolean pingMode = false;
+	private boolean running = true;
 	public void run() {
-		while (true) {
-
-			
-			
+		while (running) {
+			while(isPingMode()){
+				
+			}
 			if(getRightWindowedDistance() < MAX_DISTANCE || getLeftWindowedDistance() < MAX_DISTANCE){
 				initializePolls();
 				isThereAWall = true;
@@ -104,5 +105,20 @@ public class UltrasonicPoller extends Thread {
 	}
 	public void setIsWall(boolean decision){
 		isThereAWall = decision;
+	}
+	public boolean isPingMode(){
+		usRight.ping();
+		usLeft.ping();
+		return pingMode;
+	}
+	public void setPingMode(boolean decision){
+		pingMode = decision;
+	}
+	public void stop(){
+		this.running = false;
+		
+	}
+	public void start2(){
+		this.running = true;
 	}
 }
