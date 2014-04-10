@@ -21,7 +21,7 @@ import lejos.util.TimerListener;
  *
  */
 public class LCDInfo implements TimerListener{
-    private static final int LCD_REFRESH = 350;
+	private static final int LCD_REFRESH = 350;
 	private Timer lcdTimer;
 	private Odometer odometer;
 	/**
@@ -36,7 +36,7 @@ public class LCDInfo implements TimerListener{
 		// start the timer
 		lcdTimer.start();
 	}
-	
+
 	/**
 	 * This method is used to time out the timer.
 	 * {@inheritDoc}

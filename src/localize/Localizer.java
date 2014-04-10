@@ -79,7 +79,7 @@ public class Localizer {
 		Delay.msDelay(1000);
 		navigation.setSpeeds(SPEED, -SPEED);
 		distance = usLeft.getDistance();
-		
+
 		// If the robot is facing a wall, rotate when it's not facing the wall	
 		if (distance < 50) {
 			Sound.buzz();   
@@ -89,7 +89,7 @@ public class Localizer {
 			}
 		}
 		int count = 0;
-		
+
 		//try to find the falling edge of the wall, record the data for angle
 		while (count < 2) {
 			distance = usLeft.getDistance();
@@ -148,7 +148,7 @@ public class Localizer {
 		}
 		LCD.drawInt(ambientLeft, 0, 2);
 		LCD.drawInt(ambientRight, 0, 3);
-		
+
 		//move backward, declare the need variable
 		navigation.setSpeeds(SPEED, SPEED);
 		double[] leftX = new double[2];
@@ -156,7 +156,7 @@ public class Localizer {
 		int[] tone = new int[4];
 		int indexLeft = 0, indexRight = 0;
 		boolean leftLast = false;
-		
+
 		//sensing the grid and record distance
 		while ((indexLeft + indexRight) < 2) {
 			if ((ambientLeft * 0.9 > colorLeft.getRawLightValue())
@@ -218,10 +218,10 @@ public class Localizer {
 			y = (7.3 - (rightX[1] - rightX[0]) * Math.sin(2 * dTheta) / 2)
 					/ (Math.sin(dTheta));
 		}
-		
+
 		x = odo.getX() - x / 2;
 		navigation.setSpeeds(0, 0);
-		
+
 		//move to 0,0 point and turn to correct angle
 		navigation.moveForward(SPEED, -x - 7.3);
 		double theta = (leftLast ? 180 : -90) + Math.toDegrees(dTheta);
@@ -229,7 +229,7 @@ public class Localizer {
 		navigation.moveForward(SPEED, -y);
 		navigation.turnTo(Math.toDegrees(dTheta) + 180, true);
 		Delay.msDelay(200);
-		
+
 		//reset the odometer and the robot is localized
 		odo.setAng(0);
 		odo.setX(0);

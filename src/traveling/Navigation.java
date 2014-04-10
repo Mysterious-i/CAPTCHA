@@ -288,9 +288,9 @@ public class Navigation {
 		Motor.A.rotate(convertDistance(wheelRadius, travelDis), true);
 		Motor.B.rotate(convertDistance(wheelRadius, travelDis), false);
 	}
-    /** This method stops both motors of the robot.
-     *
-     */
+	/** This method stops both motors of the robot.
+	 *
+	 */
 	public void stopMotors(){
 		Motor.A.stop();
 		Motor.B.stop();

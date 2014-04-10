@@ -120,7 +120,7 @@ public class Detection {
 		Delay.msDelay(100);
 		return average;
 	}
-	
+
 	/**
 	 * Returns the <code>int</code> average distance read by the right ultrasonic sensor after 10 pings
 	 * 
@@ -147,7 +147,7 @@ public class Detection {
 	public int getRightDistanceOnce() {
 		return usRight.getDistance();
 	}
-	
+
 	/**
 	 * Returns the <code>int</code> average distance read by the ultrasonic sensor after n readings
 	 * 
