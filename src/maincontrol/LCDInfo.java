@@ -10,7 +10,12 @@ import lejos.util.TimerListener;
  * <code>Timer</code> lcdTimer which controls the rate at which elements will be displayed on
  * the screen.
  * 
- * @author  Alessandro Parisi
+ * @see Main
+ * 
+ * @author Alessandro Parisi
+ * @author Stefan Ti
+ * @author Bei Chen liu
+ *  
  * @version 1.0
  * @since   1.0
  *

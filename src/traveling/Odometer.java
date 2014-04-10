@@ -19,7 +19,12 @@ import lejos.util.TimerListener;
  * The <code>Odometer</code> has a lock which is used to synchronize methods for different calls 
  * to the thread and avoid deadlocks.
  * 
- * @author ale
+ * @see Navigation
+ * @see OdometryCorrection
+ * 
+ * @author Alessandro Parisi
+ * @author Stefan Ti
+ * @author Bei Chen Liu
  *
  */
 public class Odometer implements TimerListener {

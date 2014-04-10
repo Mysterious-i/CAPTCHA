@@ -13,6 +13,9 @@ import lejos.util.Delay;
  * interacting with it, as well as an instance of <code>Odometry</code> which it updates when
  * a grid line is crossed.
  * 
+ * @see Odometer
+ * @see Navigation
+ * 
  * @author Stefan T
  *
  */

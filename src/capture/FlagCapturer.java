@@ -19,12 +19,14 @@ import lejos.util.Delay;
  * 
  * Each instance of the <code>FlagCapturer</code> class is able to have an
  * instance of the <code>Navigaiton</code> class, an instance of the
- * <code>Odometer</code> class, an instance of the <code>Detection</code> class
+ * <code>Odometer</code> class, an instance of the <code>Detection</code> class, 
+ * and instance of the <code>UstrasonicPoller</code>
  * and holds the current position as well as past check-pointed positions which
- * were safe.
+ * were safe, this is held by the <code>PastPositions</code> class.
  * 
  * @see Detection
  * @see Main
+ * @see PastPositions
  * 
  * @author Alessandro Parisi
  * @since 1.0
@@ -65,24 +67,18 @@ public class FlagCapturer {
 	 * and current rotation angle to 0. Finally it takes in as parameter, the
 	 * ultrasonic sensor's (both left and right).
 	 * 
-	 * @param colorSensor
-	 *            The <code>ColorSensor</code> that is used by the
-	 *            <code>Detection</code> class
-	 * @param usRight
-	 *            The <code>UltrasonicSensor</code> that is used by the
-	 *            <code>Detection</code> class
-	 * @param usLeft
-	 *            The <code>UltrasonicSensor</code> that is used by the
-	 *            <code>Detection</code> class
-	 * @param odometer
-	 *            The <code>Odometer</code> that is used to keep track of the
-	 *            position of the robot
-	 * @param grabberLeft
-	 *            The left <code>RemoteMotor</code> that is used for grabbing
-	 *            the blocks
-	 * @param grabberRight
-	 *            The right <code>RemoteMotor</code> that is used for grabbing
-	 *            the blocks
+	 * @param colorSensor The <code>ColorSensor</code> that is used by the
+	 * <code>Detection</code> class
+	 * @param usRight The <code>UltrasonicSensor</code> that is used by the 
+	 * <code>Detection</code> class
+	 * @param usLeft The <code>UltrasonicSensor</code> that is used by the
+	 * <code>Detection</code> class
+	 * @param odometer The <code>Odometer</code> that is used to keep track of the
+	 * position of the robot
+	 * @param grabberLeft The left <code>RemoteMotor</code> that is used for grabbing
+	 * the blocks
+	 * @param grabberRight The right <code>RemoteMotor</code> that is used for grabbing
+	 * the blocks
 	 */
 	public FlagCapturer(ColorSensor colorSensor, UltrasonicSensor usRight,
 			UltrasonicSensor usLeft, Odometer odometer,
@@ -116,20 +112,21 @@ public class FlagCapturer {
 	 * flag position coordinates and brings it to the final position which is
 	 * specified by the <code>int</code> array of final positions.
 	 * 
-	 * @param FlagPosCoords
-	 *            The <code>int</code> array of positions of the area where the
-	 *            flag is
-	 * @param FinalPosCoords
-	 *            The <code>int</code> array of positions of the area where the
-	 *            flag is
-	 * @param color
-	 *            The <code>int</code> color of the flag needed to capture
+	 * @param FlagPosCoordsLower The <code>int</code> array of positions of the lower left coordinates where the
+	 *  flag is
+     * @param FlagPosCoordsUpper The <code>int</code> array of positions of the upper right coordinates where the
+	 * flag is
+	 * @param FinalPosCoords The <code>int</code> array of positions of the lower left coordinates where the
+	 * flag must be dropped off
+     * @param AvoidZone The <code>int</code> array of positions of the area where the robot can not enter
+	 * @param color The <code>int</code> color of the flag needed to capture
 	 */
 	public void captureFlag(int[] FlagPosCoordsLower, int[] FlagPosCoordsUpper,
 			int[] FinalPosCoords, int[] AvoidZone, int color) {
 
-		// Get the coordonates of the lower left and upper right positions of
-		// the flag zone
+		/*Get the coordonates of the lower left and upper right positions of
+		 the flag zone, and avoid zone.
+         */
 		this.XFlagLowerLeft = FlagPosCoordsLower[0] * TILE_LENGTH;
 		this.YFlagLowerLeft = FlagPosCoordsLower[1] * TILE_LENGTH;
 		this.XFlagUpperRight = FlagPosCoordsUpper[0] * TILE_LENGTH;
@@ -153,19 +150,29 @@ public class FlagCapturer {
 		this.XDropOff = FinalPosCoords[0] * TILE_LENGTH + TILE_LENGTH / 2;
 		this.YDropOff = FinalPosCoords[1] * TILE_LENGTH + TILE_LENGTH / 2;
 
+        /*Find the max distance you can scan for a block without scanning a wall
+         and thinking its a block
+         */
+        
 		MAX_OBJECT_DISTANCE = (int) ((FlagPosCoordsUpper[1] - FlagPosCoordsLower[1]) / 2 * TILE_LENGTH);
 
+        //Start the pooller and move to the flag zone.
 		usPoller.start();
-	
+        
 		pathTo(XFlagLowerLeft + OFFSET_INZONE, YFlagLowerLeft + OFFSET_INZONE);
 		navigation.travelTo(YFlagMid, YFlagLowerLeft, true);
 
+        //Stop the poller and search for the flag
 		usPoller.stop();
 
 		searchForFlag(color);
 
+        /*Once the flag is captured, reorient your axes so that you
+          are always moving up and to the right.
+         */
 		reOrient();
 
+        //Reinitialize the poller and move towards the final drop off zone
 		usPoller = new UltrasonicPoller(usLeft, usRight, MAX_DISTANCE);
 		usPoller.start();
 
@@ -180,7 +187,8 @@ public class FlagCapturer {
 
 	/*
 	 * This method finds a path to a specified X and Y position. It will always
-	 * try to move up and right until it reaches its destination. In the case it
+	 * try to move up and right until it reaches its destination (changing direction in the 
+     * case it runs into a wall). In the case it
 	 * has walls on both the right and up directions, it will back track to a
 	 * previous point and try a different direction.
 	 */
@@ -201,7 +209,7 @@ public class FlagCapturer {
 		// While we are not past our destination, keep moving
 		while (odometer.getX() < XDest || odometer.getY() < YDest) {
 
-			// While there is not block in front
+			// While there is not block in front and you are not close to the zone you are not allowed to enter
 			while (!usPoller.getIsWall() && !isInOtherTeamDropOff()) {
 
 				// If we are at our destination, exit the loop
@@ -209,6 +217,7 @@ public class FlagCapturer {
 					break;
 				}
 				
+                //Check if you have changed your direction
 				if(pastDirection != direction){
 					changedDirection = true;
 					pastDirection = direction;
@@ -239,7 +248,8 @@ public class FlagCapturer {
 				}
 
 				/*
-				 * Store the current x and y positions as safe points for future
+                 * If you travelled more than 15 centimeters from the last checkPoint,
+				 * store the current x and y positions as safe points for future
 				 * backtracking reference.
 				 */
 				if (distanceTravelled(XCheckPoint, YCheckPoint,
@@ -251,23 +261,32 @@ public class FlagCapturer {
 					YCheckPoint = odometer.getY();
 
 				}
+                //If you have changed direction, travel to this new direction
 				if(changedDirection){
 					navigation.travelTo(ver, hor, true);
 					changedDirection = false;
 				}
 
+                /* If you are moving down, finish the travel to
+                 *
+                 */
 				while (direction == 2 && odometer.getX() > ver + 1) {
 					
 				}
-
+                /* If you are moving left, finish the travel to
+                 *
+                 */
 				while (direction == 3 && odometer.getY() > hor + 1) {
 
 				}
-
+                
+                //If you were moving down start moving right again
 				if (direction == 2) {
 					direction = 1;
 					atEndX = false;
 				}
+                
+                //If you were moving left start moving up again
 				if (direction == 3) {
 					direction = 0;
 					atEndY = false;
@@ -278,7 +297,7 @@ public class FlagCapturer {
 				 * direction change your direction to right.
 				 */
 				if (odometer.getX() >= XDest && direction == 0) {
-					Sound.beep();
+					
 					atEndX = true;
 					navigation.turnTo(90, true);
 					direction = 1;
@@ -294,6 +313,7 @@ public class FlagCapturer {
 				}
 			}
 
+            //Stop the motors because you saw a wall
 			navigation.stopMotors();
 
 			// If you are at your destination, exit the loop
@@ -301,6 +321,10 @@ public class FlagCapturer {
 				break;
 			}
 			
+            /* If you were in the avoid zone, then move backwards a bit to ensure 
+             * you are not in the block anymore if you try a different direction.
+             */
+            
 			if(isInOtherTeamDropOff()){
 				navigation.goForwardSpeed(150);
 				try {
@@ -313,7 +337,7 @@ public class FlagCapturer {
 			}
 			
 			/*
-			 * If you were moving up when you saw something in front of you, IF
+			 * If you were moving up when you saw something in front of you, if
 			 * you are not in your final position on your right, turn right,else
 			 * are then go turn left.
 			 */
@@ -333,6 +357,7 @@ public class FlagCapturer {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+                
 				/*
 				 * If there is something in your way in this direction as well,
 				 * backtrack to a previous safe point.
@@ -380,6 +405,11 @@ public class FlagCapturer {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+                
+                /*
+				 * If there is something in your way in this direction as well,
+				 * backtrack to a previous safe point.
+				 */
 				if (usPoller.getIsWall()) {
 
 					ver = pastPos.getPointX();
@@ -397,9 +427,15 @@ public class FlagCapturer {
 					}
 					;
 				}
-			} else if (direction == 2) {
+			}
+            
+            //If you were moving left and saw a wall move down
+            else if (direction == 2) {
 				direction = 3;
-			} else if (direction == 3) {
+			}
+            
+            //If you were moving down ad saw a wall move left
+            else if (direction == 3) {
 				direction = 2;
 			}
 
@@ -415,7 +451,8 @@ public class FlagCapturer {
 	 * while scanning a 180 degree angle till it finds a block. If the block is
 	 * the incorrect color, then move it away from the zone, if it is the
 	 * correct color then grab it and move to the specified corner of the flag
-	 * zone.
+	 * zone. If it reaches the end of the zone without finding the flag, it will
+     * move in the opposite direction and repeat the process of searching.
 	 */
 	private void searchForFlag(int color) {
 		int offSetX = 0;
@@ -441,6 +478,7 @@ public class FlagCapturer {
 				offSetX = offSetX - 20;
 			}
 
+            //If you are at either etremity of the flag area, move in the opposite direciton
 			if (offSetX + XFlagLowerLeft >= XFlagUpperRight- MAX_OBJECT_DISTANCE && !oppositeDirection) {
 				oppositeDirection = true;
 				offSetX = (int) (XFlagUpperRight - MAX_OBJECT_DISTANCE);
@@ -464,6 +502,7 @@ public class FlagCapturer {
 		navigation.travelTo(XFlagMid, YFlagMid, false);
 	}
 
+    //Distance between 2 points
 	private double distanceTravelled(double x1, double y1, double x2, double y2) {
 		return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 	}
@@ -506,14 +545,17 @@ public class FlagCapturer {
 		 * While the flag is not yet captured, we try to find it
 		 */
 		while (!flagIsCaptured && currentAngle <= endAngle) {
+            
 			/*
-			 * Increase the angle in intervals of 5 until the final angle is
+			 * Increase the angle in small intervals until the final angle is
 			 * reached or the ultrasonic sensor scans something with both
 			 * sensor.
 			 */
 			do {
 				currentAngle += 7;
 				navigation.turnTo(currentAngle, true);
+				LCD.drawString("" + detection.getLeftDistance(), 0, 3);
+				LCD.drawString("" + detection.getRightDistance(), 0, 4);
 			} while (currentAngle <= endAngle
 					&& ((detection.getLeftDistance() > MAX_OBJECT_DISTANCE) || (detection
 							.getRightDistance() > MAX_OBJECT_DISTANCE)));
@@ -556,7 +598,7 @@ public class FlagCapturer {
 			navigation.setSpeeds(0, 0);
 			/*
 			 * While he robot did not fail in finding a block check the color
-			 * and get the current x and y of the block.
+			 * and get the current x and y of the block to return to later
 			 */
 			if (!fail && !flagIsCaptured) {
 
@@ -624,12 +666,16 @@ public class FlagCapturer {
 		return flagIsCaptured;
 	}
 
+    //This method checks if the robot (odometer reading) is in the avoidance zone. It returns true if it is
 	private boolean isInOtherTeamDropOff() {
 		return ((odometer.getX() > avoidZoneLowerX)
 				&& (odometer.getX() < avoidZoneUpperX)
 				&& (odometer.getY() > avoidZoneLowerY) && (odometer.getY() < avoidZoneUpperY));
 	}
 	
+    /*his method re orients the robot's axes depending on where the drop off it to ensure the 
+     * robot always moves up and right.
+     */
 	private void reOrient(){		
 		
 		if(odometer.getX() >= XDropOff && odometer.getY() >= YDropOff){

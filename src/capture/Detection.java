@@ -151,6 +151,9 @@ public class Detection {
 	/**
 	 * Returns the <code>int</code> average distance read by the ultrasonic sensor after n readings
 	 * 
+	 * @param us the <code>UltrasonicSensor</code> that will be used to get the readings
+	 * @param n the <code> int </code> number of readings in the average
+	 * 
 	 * @return the <code>int</code> average distance read by the ultrasonic sensor after n readings
 	 */
 	public int getAverageDistance(UltrasonicSensor us, int n) {
@@ -172,10 +175,10 @@ public class Detection {
 	}
 
 	/**
-	 * Returns a <code>boolean</code> true if either sensor sees a wall in front
+	 * Returns a <code>boolean</code> true if both sensors sees a wall in front
 	 * of both sensors
 	 * 
-	 * @return a <code>boolean</code> true if either sensor sees a wall in front
+	 * @return a <code>boolean</code> true if both sensors sees a wall in front
 	 *         of both sensors
 	 */
 	public boolean wallInFrontOfBoth() {

@@ -3,7 +3,7 @@ import lejos.nxt.*;
 import lejos.nxt.comm.*;
 import lejos.util.TextMenu;
 
-/**
+/*
  * Create an LCP responder to handle LCP requests. Allow the
  * User to choose between Bluetooth, USB and RS485 protocols.
  * 
@@ -12,7 +12,7 @@ import lejos.util.TextMenu;
  */
 public class NXTLCPRespond
 {
-    /**
+    /*
      * Our local Responder class so that we can over-ride the standard
      * behaviour. We modify the disconnect action so that the thread will
      * exit.
